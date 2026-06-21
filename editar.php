@@ -2,10 +2,14 @@
 
 require_once 'config/conexao.php';
 
-$id = $_GET['id'];
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$id) {
+    header("Location: index.php");
+    exit;
+}
 
 $sql = "SELECT * FROM produtos WHERE id = :id";
-
 $stmt = $conexao->prepare($sql);
 
 $stmt->execute([
@@ -14,19 +18,24 @@ $stmt->execute([
 
 $produto = $stmt->fetch(PDO::FETCH_ASSOC);
 
+if (!$produto) {
+    header("Location: index.php");
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $nome = $_POST['nome'];
-    $fabricante = $_POST['fabricante'];
+    $nome = trim($_POST['nome']);
+    $fabricante = trim($_POST['fabricante']);
     $preco = $_POST['preco'];
     $estoque = $_POST['estoque'];
 
     $update = "UPDATE produtos
-    SET nome = :nome,
-        fabricante = :fabricante,
-        preco = :preco,
-        estoque = :estoque
-    WHERE id = :id";
+               SET nome = :nome,
+                   fabricante = :fabricante,
+                   preco = :preco,
+                   estoque = :estoque
+               WHERE id = :id";
 
     $stmt = $conexao->prepare($update);
 
@@ -39,38 +48,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ]);
 
     header("Location: index.php");
+    exit;
 }
 
 require_once 'includes/header.php';
+
 ?>
 
-<h2>Editar Produto</h2>
+<div class="form-container">
 
-<form method="POST">
+    <div class="card">
 
-<input type="text"
-name="nome"
-value="<?= $produto['nome'] ?>"
-required>
+        <h2>Editar Produto</h2>
 
-<input type="text"
-name="fabricante"
-value="<?= $produto['fabricante'] ?>"
-required>
+        <form method="POST">
 
-<input type="number"
-step="0.01"
-name="preco"
-value="<?= $produto['preco'] ?>"
-required>
+            <label>Nome do Produto</label>
+            <input
+                type="text"
+                name="nome"
+                value="<?= htmlspecialchars($produto['nome']) ?>"
+                required>
 
-<input type="number"
-name="estoque"
-value="<?= $produto['estoque'] ?>"
-required>
+            <label>Fabricante</label>
+            <input
+                type="text"
+                name="fabricante"
+                value="<?= htmlspecialchars($produto['fabricante']) ?>"
+                required>
 
-<button type="submit">Salvar</button>
+            <label>Preço</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="preco"
+                value="<?= $produto['preco'] ?>"
+                required>
 
-</form>
+            <label>Estoque</label>
+            <input
+                type="number"
+                min="0"
+                name="estoque"
+                value="<?= $produto['estoque'] ?>"
+                required>
+
+            <div class="acoes">
+
+                <button type="submit" class="btn editar">
+                    Salvar Alterações
+                </button>
+
+                <a href="index.php" class="btn excluir">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 
 <?php require_once 'includes/footer.php'; ?>
