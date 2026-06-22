@@ -72,7 +72,7 @@ require_once 'includes/header.php';
 
             <div class="acoes">
 
-                <button type="submit" class="btn novo">
+                <button type="submit"style="background:#28a745;color:white;border:none;padding:12px 25px;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 0 12px rgba(255,20,147,.5);transition:.3s;">
                     Cadastrar
                 </button>
 
